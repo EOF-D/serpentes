@@ -30,7 +30,7 @@ def main() -> None:
     if args.hook is True:
         path = get_paths()["purelib"]
 
-        with open(get_paths()["purelib"] + "/serpentes_autoload.pth", "a") as fp:
+        with open(path + "/serpentes_autoload.pth", "a") as fp:
             fp.write("import serpentes")
 
         print(f"Wrote `serpentes_autoload.pth` to {path}")
