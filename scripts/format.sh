@@ -1,2 +1,2 @@
 poetry run black ./ --line-length=90
-poetry run isort ./
+poetry run isort ./ --profile="black"
