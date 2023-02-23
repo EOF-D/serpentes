@@ -1,0 +1,48 @@
+module: [statement+] // A module consists of one or more statements.
+
+statement: expression -> expr_statement // Expression statement (single)
+
+expression: literals
+	| name		-> variable
+	| atom
+
+atom: list		-> list_literal
+    | tuple		-> tuple_literal
+    | set		-> set_literal
+
+literals:
+	| NONE		-> const_none
+	| TRUE		-> const_true
+	| FALSE		-> const_false
+	| number	-> const_number
+	| string	-> const_string
+	| list
+	| tuple
+	| set
+	| dict
+
+NONE: "none"
+TRUE: "true"
+FALSE: "false"
+
+list:  "[" _cs_list{expression} "]"
+tuple: "(" _cs_list{expression} ")"
+set:   "{" _cs_list{expression} "}"
+dict:  "{" _sep{_key_value, ","} "}"
+
+_cs_list{item}: item [("," item)* | (", " item)*] ","?
+_sep{item, sep}: item (sep item)*
+_key_value: expression ":" expression
+
+
+%import python.name
+%import python.number
+%import python.string
+
+%import common.CPP_COMMENT
+%import common.NEWLINE
+%import common.WS
+
+%ignore CPP_COMMENT
+%ignore NEWLINE
+%ignore WS
