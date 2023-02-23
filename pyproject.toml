@@ -1,0 +1,23 @@
+[tool.poetry]
+name = "serpentes"
+version = "0.1.0"
+description = "A python based programming language."
+authors = ["EOF-D <END-OFD@pm.me>"]
+license = "MIT"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+lark = "^1.1.5"
+
+[tool.poetry.dev-dependencies]
+astmonkey = "^0.3.6"
+pyright = "^1.1.295"
+black = "^23.1.0"
+isort = "^5.12.0"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.pyright]
+typeCheckingMode = "strict"
