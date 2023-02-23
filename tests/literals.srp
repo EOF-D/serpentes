@@ -1,0 +1,21 @@
+# -*- coding: serpentes -*-
+
+// Const literals
+none
+true
+false
+
+// Number literals
+0xFFFF
+0b1010
+0o100
+0.99
+123
+
+// Strings
+"Hello World!"
+
+// Variables
+foo
+bar
+baz
