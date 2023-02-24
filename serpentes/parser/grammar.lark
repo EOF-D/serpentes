@@ -2,13 +2,13 @@ module: [statement+] // A module consists of one or more statements.
 
 statement: expression -> expr_statement // Expression statement (single)
 
-expression: literals
+!expression: literals
 	| name		-> variable
 	| atom
 
-atom: list		-> list_literal
-    | tuple		-> tuple_literal
-    | set		-> set_literal
+atom: list
+    | tuple
+    | set
 
 literals:
 	| NONE		-> const_none
@@ -16,10 +16,10 @@ literals:
 	| FALSE		-> const_false
 	| number	-> const_number
 	| string	-> const_string
-	| list
-	| tuple
-	| set
-	| dict
+	| list		-> list_literal
+	| tuple		-> tuple_literal
+	| set		-> set_literal
+	| dict		-> dict_literal
 
 NONE: "none"
 TRUE: "true"
@@ -28,11 +28,11 @@ FALSE: "false"
 list:  "[" _cs_list{expression} "]"
 tuple: "(" _cs_list{expression} ")"
 set:   "{" _cs_list{expression} "}"
-dict:  "{" _sep{_key_value, ","} "}"
+dict:  "{" _sep{key_value, ","} "}"
 
 _cs_list{item}: item [("," item)* | (", " item)*] ","?
 _sep{item, sep}: item (sep item)*
-_key_value: expression ":" expression
+key_value: expression ":" expression
 
 
 %import python.name
