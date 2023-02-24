@@ -1,11 +1,11 @@
 from __future__ import annotations
 
 import ast
+import typing
 from functools import partial
-from typing import Any, Generic, TypeVar
 
 __all__ = (
-    "Node",
+    "define",
     "Literals",
     "Variables",
     "Expressions",
@@ -16,12 +16,16 @@ __all__ = (
     "Module",
 )
 
-NodeT = TypeVar("NodeT")
+NodeT = typing.TypeVar("NodeT")
 
 
-class Node(Generic[NodeT]):
+def define(node: NodeT) -> partial[Node[NodeT]]:
+    return partial(Node, ast=node)
+
+
+class Node(typing.Generic[NodeT]):
     ast: type[NodeT]
-    data: dict[str, Any]
+    data: dict[str, typing.Any]
 
     lineno: int
     end_lineno: int
@@ -29,7 +33,7 @@ class Node(Generic[NodeT]):
     col_offset: int
     end_col_offset: int
 
-    def __init__(self, **data: Any) -> None:
+    def __init__(self, **data: typing.Any) -> None:
         meta = data.pop("meta")
         self.lineno = meta.line
         self.end_lineno = meta.end_line
@@ -40,16 +44,10 @@ class Node(Generic[NodeT]):
         self.data = data
         self.ast = data.pop("ast")
 
-    def __class_getitem__(cls: type[Node[Any]], ast: str | NodeT) -> partial[Node[NodeT]]:
-        if isinstance(ast, str):
-            return cls  # pyright: ignore
-
-        return partial(cls, ast=ast)
-
     def build(self) -> NodeT:
         parsed: dict[str, ast.AST | int] = {}
 
-        def recurse(value: Node[Any] | list[Node[Any]]) -> Any:
+        def recurse(value: Node[typing.Any] | list[Node[typing.Any]]) -> typing.Any:
             if isinstance(value, Node):
                 return value.build()
 
@@ -77,99 +75,99 @@ class Node(Generic[NodeT]):
 
 
 class Literals:
-    Constant = Node[ast.Constant]
-    List = Node[ast.List]
-    Tuple = Node[ast.Tuple]
-    Set = Node[ast.Set]
-    Dict = Node[ast.Dict]
+    Constant = define(ast.Constant)
+    List = define(ast.List)
+    Tuple = define(ast.Tuple)
+    Set = define(ast.Set)
+    Dict = define(ast.Dict)
 
 
 class Variables:
-    Name = Node[ast.Name]
-    Starred = Node[ast.Starred]
+    Name = define(ast.Name)
+    Starred = define(ast.Starred)
 
 
 class Expressions:
-    Expr = Node[ast.Expr]
+    Expr = define(ast.Expr)
 
-    UnaryOp = Node[ast.UnaryOp]
-    BinOp = Node[ast.BinOp]
-    Compare = Node[ast.Compare]
+    UnaryOp = define(ast.UnaryOp)
+    BinOp = define(ast.BinOp)
+    Compare = define(ast.Compare)
 
-    Call = Node[ast.Call]
-    Keyword = Node[ast.keyword]
+    Call = define(ast.Call)
+    Keyword = define(ast.keyword)
 
-    IfExp = Node[ast.IfExp]
+    IfExp = define(ast.IfExp)
 
-    Attribute = Node[ast.Attribute]
-    NamedExpr = Node[ast.NamedExpr]
+    Attribute = define(ast.Attribute)
+    NamedExpr = define(ast.NamedExpr)
 
 
 class Subscripting:
-    Subscript = Node[ast.Subscript]
-    Slice = Node[ast.Slice]
+    Subscript = define(ast.Subscript)
+    Slice = define(ast.Slice)
 
 
 class Comprehensions:
-    ListComp = Node[ast.ListComp]
-    SetComp = Node[ast.SetComp]
-    GeneratorExp = Node[ast.GeneratorExp]
-    DictComp = Node[ast.DictComp]
-    Comphrehension = Node[ast.comprehension]
+    ListComp = define(ast.ListComp)
+    SetComp = define(ast.SetComp)
+    GeneratorExp = define(ast.GeneratorExp)
+    DictComp = define(ast.DictComp)
+    Comphrehension = define(ast.comprehension)
 
 
 class Statements:
-    Assign = Node[ast.Assign]
-    AnnAssign = Node[ast.AnnAssign]
-    AugAssign = Node[ast.AugAssign]
+    Assign = define(ast.Assign)
+    AnnAssign = define(ast.AnnAssign)
+    AugAssign = define(ast.AugAssign)
 
-    Raise = Node[ast.Raise]
-    Assert = Node[ast.Assert]
-    Delete = Node[ast.Delete]
-    Pass = Node[ast.Pass]
+    Raise = define(ast.Raise)
+    Assert = define(ast.Assert)
+    Delete = define(ast.Delete)
+    Pass = define(ast.Pass)
 
-    Import = Node[ast.Import]
-    ImprotFrom = Node[ast.ImportFrom]
+    Import = define(ast.Import)
+    ImprotFrom = define(ast.ImportFrom)
 
-    Alias = Node[ast.alias]
+    Alias = define(ast.alias)
 
 
 class Controlflow:
-    If = Node[ast.If]
-    For = Node[ast.For]
-    While = Node[ast.While]
+    If = define(ast.If)
+    For = define(ast.For)
+    While = define(ast.While)
 
-    Break = Node[ast.Break]
-    Continue = Node[ast.Continue]
+    Break = define(ast.Break)
+    Continue = define(ast.Continue)
 
-    Try = Node[ast.Try]
-    ExceptHandler = Node[ast.ExceptHandler]
+    Try = define(ast.Try)
+    ExceptHandler = define(ast.ExceptHandler)
 
-    With = Node[ast.With]
-    WithItem = Node[ast.withitem]
+    With = define(ast.With)
+    WithItem = define(ast.withitem)
 
 
 class Objects:
-    Functiondef = Node[ast.FunctionDef]
-    Lambda = Node[ast.Lambda]
+    Functiondef = define(ast.FunctionDef)
+    Lambda = define(ast.Lambda)
 
-    Arguments = Node[ast.arguments]
-    Arg = Node[ast.arg]
+    Arguments = define(ast.arguments)
+    Arg = define(ast.arg)
 
-    Return = Node[ast.Return]
-    Yield = Node[ast.Yield]
-    YieldFrom = Node[ast.YieldFrom]
+    Return = define(ast.Return)
+    Yield = define(ast.Yield)
+    YieldFrom = define(ast.YieldFrom)
 
-    Global = Node[ast.Global]
-    Nonlocal = Node[ast.Nonlocal]
+    Global = define(ast.Global)
+    Nonlocal = define(ast.Nonlocal)
 
-    ClassDef = Node[ast.ClassDef]
+    ClassDef = define(ast.ClassDef)
 
-    AsyncFunctionDef = Node[ast.AsyncFunctionDef]
-    Await = Node[ast.Await]
+    AsyncFunctionDef = define(ast.AsyncFunctionDef)
+    Await = define(ast.Await)
 
-    AsyncFor = Node[ast.AsyncFor]
-    AsyncWith = Node[ast.AsyncWith]
+    AsyncFor = define(ast.AsyncFor)
+    AsyncWith = define(ast.AsyncWith)
 
 
-Module = Node[ast.Module]
+Module = define(ast.Module)
