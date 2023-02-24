@@ -44,6 +44,9 @@ class Node(typing.Generic[NodeT]):
         self.data = data
         self.ast = data.pop("ast")
 
+    def __repr__(self) -> str:
+        return f"<Node={self.ast.__name__} id={id(self)}>"
+
     def build(self) -> NodeT:
         parsed: dict[str, ast.AST | int] = {}
 
