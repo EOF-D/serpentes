@@ -8,10 +8,10 @@ from lark import Lark
 from serpentes import __author__, __version__
 
 
-def main() -> None:
+def gen_parser() -> ArgumentParser:
     parser = ArgumentParser(prog="Serpentes", description="Tools for Serpentes.")
-    parser.add_argument("--author", action="store_true", help="The author of Serpentes.")
 
+    parser.add_argument("--author", action="store_true", help="The author of Serpentes.")
     parser.add_argument(
         "--hook", action="store_true", help="Hooks the Serpentes codec to Python."
     )
@@ -27,6 +27,12 @@ def main() -> None:
         help="Run the lark parser on a file."
     )
 
+
+    return parser
+
+
+def main() -> None:
+    parser = gen_parser()
     args = parser.parse_args()
 
     if args.version is True:
