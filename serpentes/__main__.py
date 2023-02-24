@@ -5,7 +5,7 @@ from sysconfig import get_paths
 import rich
 from lark import Lark
 
-from serpentes import __author__, __version__
+from serpentes import SrpTransformer, __author__, __version__
 
 
 def gen_parser() -> ArgumentParser:
@@ -54,7 +54,8 @@ def main() -> None:
             )
 
         with open(args.lark, "r") as fp:
-            rich.print(parser.parse(fp.read()))
+            tree = SrpTransformer().transform(parser.parse(fp.read()))
+            rich.print(tree)
 
 
 if __name__ == "__main__":
