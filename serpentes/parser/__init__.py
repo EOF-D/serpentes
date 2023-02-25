@@ -30,7 +30,9 @@ def isnode(item: typing.Any) -> bool:
 
 @v_args(inline=True, meta=True)
 class SrpTransformer(Transformer):
-    def parse_container(self, meta: Meta, items: Tree) -> Containers:
+    def parse_container(
+        self, meta: Meta, items: Tree, ctx: ast.Load | ast.Store | ast.Del = ast.Load()
+    ) -> Containers:
         if items.data == "dict":
             keys: list[Node[typing.Any]] = []
             values: list[Node[typing.Any]] = []
@@ -47,7 +49,10 @@ class SrpTransformer(Transformer):
         for element in items.scan_values(isnode):
             elements.append(element)
 
-        return types[items.data](meta=meta, elts=elements, ctx=ast.Load())
+        node = types[items.data]
+        kwargs = {"ctx": ctx} if not issubclass(node.ast, ast.Set) else {}
+
+        return node(meta=meta, elts=elements, **kwargs)
 
     def key_value(self, _: Meta, key, value) -> tuple[Node[typing.Any], Node[typing.Any]]:
         return key, value
