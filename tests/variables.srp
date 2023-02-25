@@ -1,0 +1,9 @@
+foo
+bar
+baz
+
+*foo
+
+// foo = 123
+// bar = "bar"
+// baz = 9e9

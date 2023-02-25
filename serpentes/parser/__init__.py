@@ -19,8 +19,12 @@ from ..nodes import (
     Variables,
 )
 
+Context: typing.TypeAlias = ast.Load | ast.Store | ast.Del
 Containers: typing.TypeAlias = (
-    Node[ast.List] | Node[type[ast.Tuple]] | Node[type[ast.Set]] | Node[type[ast.Dict]]
+    Node[type[ast.List]]
+    | Node[type[ast.Tuple]]
+    | Node[type[ast.Set]]
+    | Node[type[ast.Dict]]
 )
 
 
@@ -30,8 +34,22 @@ def isnode(item: typing.Any) -> bool:
 
 @v_args(inline=True, meta=True)
 class SrpTransformer(Transformer):
+    def expr_statement(self, meta: Meta, expr: Node[typing.Any]) -> Node[type[ast.Expr]]:
+        return Expressions.Expr(meta=meta, value=expr)
+
+    def starred(self, meta: Meta, *expr, ctx: Context = ast.Load()):
+        return Variables.Starred(meta=meta, value=expr[0], ctx=ctx)
+
+    def name(
+        self, meta: Meta, token: Token, ctx: Context = ast.Load()
+    ) -> Node[type[ast.Name]]:
+        return Variables.Name(meta=meta, id=token.value, ctx=ctx)
+
+    def variable(self, _: Meta, item: Node[type[ast.Name]]) -> Node[type[ast.Name]]:
+        return item
+
     def parse_container(
-        self, meta: Meta, items: Tree, ctx: ast.Load | ast.Store | ast.Del = ast.Load()
+        self, meta: Meta, items: Tree, ctx: Context = ast.Load()
     ) -> Containers:
         if items.data == "dict":
             keys: list[Node[typing.Any]] = []

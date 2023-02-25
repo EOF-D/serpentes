@@ -4,6 +4,7 @@ statement: expression -> expr_statement // Expression statement (single)
 
 !expression: literals
 	| name		-> variable
+	| starred
 	| atom
 
 atom: list
@@ -24,6 +25,8 @@ literals:
 NONE: "none"
 TRUE: "true"
 FALSE: "false"
+
+starred: "*" expression
 
 list:  "[" _cs_list{expression} "]"
 tuple: "(" _cs_list{expression} ")"
