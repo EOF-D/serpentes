@@ -77,6 +77,23 @@ class Node(typing.Generic[NodeT]):
         return self.ast(**parsed)
 
 
+class Module:
+    def __init__(
+        self, body: tuple[Node[typing.Any]], type_ignores: list[typing.Any]
+    ) -> None:
+        self.type_ignores = type_ignores
+        self.body = body
+
+    def build(self) -> ast.Module:
+        body: list[ast.AST] = []
+
+        for children in self.body:
+            if isinstance(children, Node):
+                body.append(children.build())
+
+        return ast.Module(body=body, type_ignores=self.type_ignores)
+
+
 class Literals:
     Constant = define(ast.Constant)
     List = define(ast.List)
@@ -171,6 +188,3 @@ class Objects:
 
     AsyncFor = define(ast.AsyncFor)
     AsyncWith = define(ast.AsyncWith)
-
-
-Module = define(ast.Module)

@@ -1,3 +1,4 @@
+import ast
 import os
 from argparse import ArgumentParser
 from sysconfig import get_paths
@@ -55,7 +56,10 @@ def main() -> None:
 
         with open(args.lark, "r") as fp:
             tree = SrpTransformer().transform(parser.parse(fp.read()))
-            rich.print(tree)
+            rich.inspect(tree, methods=True)
+
+            for children in tree.build().body:
+                rich.print(ast.dump(children, indent=2))
 
 
 if __name__ == "__main__":

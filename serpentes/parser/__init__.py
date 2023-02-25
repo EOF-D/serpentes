@@ -34,6 +34,9 @@ def isnode(item: typing.Any) -> bool:
 
 @v_args(inline=True, meta=True)
 class SrpTransformer(Transformer):
+    def module(self, _: Meta, *items: Node[typing.Any]) -> Module:
+        return Module(body=items, type_ignores=[])
+
     def expr_statement(self, meta: Meta, expr: Node[typing.Any]) -> Node[type[ast.Expr]]:
         return Expressions.Expr(meta=meta, value=expr)
 
@@ -68,7 +71,7 @@ class SrpTransformer(Transformer):
             elements.append(element)
 
         node = types[items.data]
-        kwargs = {"ctx": ctx} if not issubclass(node.ast, ast.Set) else {}
+        kwargs = {"ctx": ctx} if not node is Literals.Set else {}
 
         return node(meta=meta, elts=elements, **kwargs)
 
