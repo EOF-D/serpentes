@@ -40,8 +40,10 @@ class SrpTransformer(Transformer):
     def expr_statement(self, meta: Meta, expr: Node[typing.Any]) -> Node[type[ast.Expr]]:
         return Expressions.Expr(meta=meta, value=expr)
 
-    def starred(self, meta: Meta, *expr, ctx: Context = ast.Load()):
-        return Variables.Starred(meta=meta, value=expr[0], ctx=ctx)
+    def star_expr(
+        self, meta: Meta, *expr: Node[typing.Any], ctx: Context = ast.Load()
+    ) -> Node[type[ast.Starred]]:
+        return Variables.Starred(meta=meta, value=expr[1], ctx=ctx)
 
     def name(
         self, meta: Meta, token: Token, ctx: Context = ast.Load()
