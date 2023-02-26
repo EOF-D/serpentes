@@ -2,22 +2,21 @@ module: [statement+] // A module consists of one or more statements.
 
 statement: expression -> expr_statement // Expression statement (single)
 
-expression: literals
+expression: atom
 	| name		-> variable
 	| "*" name	-> star_expr
-	| bit_expr
-	| unary_expr
-	| sum
 
 ?atom: literals
 	| "(" sum ")"
+	| sum
+	| product
 	| bit_expr
 	| unary_expr
 
-?sum: product
+?sum.0: product
 	| sum add_op product
 
-?product: atom
+?product.0: atom
 	| product mul_op atom
 
 unary_expr: unary_op expression
@@ -30,7 +29,7 @@ bit_expr.0: expression bit_op expression
 !bit_op: "<<" | ">>" | "&" | "|" | "^"
 
 !add_op: "+" | "-"
-!mul_op: "*" | "@" | "/" | "%" | "//"
+!mul_op: "*" | "@" | "/" | "%" | "**"
 
 ?literals: const_none
 	| const_true

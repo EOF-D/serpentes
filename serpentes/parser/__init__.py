@@ -28,8 +28,8 @@ Containers: typing.TypeAlias = (
 )
 
 BitOp: typing.TypeAlias = ast.LShift | ast.RShift | ast.BitOr | ast.BitXor | ast.BitAnd
-
 UnaryOp: typing.TypeAlias = ast.UAdd | ast.USub | ast.Invert | ast.Not
+MulOp: typing.TypeAlias = ast.Mult | ast.Div | ast.Mod | ast.Pow | ast.MatMult
 
 
 def isnode(item: typing.Any) -> bool:
@@ -44,10 +44,40 @@ class SrpTransformer(Transformer):
     def expr_statement(self, meta: Meta, expr: Node[typing.Any]) -> Node[type[ast.Expr]]:
         return Expressions.Expr(meta=meta, value=expr)
 
+    def product(
+        self,
+        meta: Meta,
+        *operation: tuple[Node[typing.Any], MulOp | ast.Add | ast.Sub, Node[typing.Any]],
+    ) -> Node[type[ast.BinOp]]:
+        return Expressions.BinOp(
+            meta=meta, left=operation[0], op=operation[1], right=operation[2]
+        )
+
+    sum = product
+
+    def add_op(self, _: Meta, token: Token) -> ast.Add | ast.Sub:
+        return ast.Add() if token.value == "+" else ast.Sub()
+
+    def mul_op(self, _: Meta, token: Token) -> MulOp:
+        match token.value:
+            case "*":
+                return ast.Mult()
+            case "/":
+                return ast.Div()
+            case "%":
+                return ast.Mod()
+            case "**":
+                return ast.Pow()
+            case "@":
+                return ast.MatMult()
+
+            case _:
+                raise ValueError("Unknown mult operator.")
+
     def bit_expr(
         self, meta: Meta, *operation: tuple[Node[typing.Any], BitOp, Node[typing.Any]]
-    ) -> ast.BinOp:
-        return ast.BinOp(
+    ) -> Node[type[ast.BinOp]]:
+        return Expressions.BinOp(
             meta=meta, left=operation[0], op=operation[1], right=operation[2]
         )
 
@@ -65,7 +95,7 @@ class SrpTransformer(Transformer):
                 return ast.BitAnd()
 
             case _:
-                raise RuntimeError("Unknown bit operator.")
+                raise ValueError("Unknown bit operator.")
 
     def unary_expr(
         self, meta: Meta, op: UnaryOp, oper: Node[typing.Any]
@@ -84,7 +114,7 @@ class SrpTransformer(Transformer):
                 return ast.Not()
 
             case _:
-                raise RuntimeError("Unknown unary operator.")
+                raise ValueError("Unknown unary operator.")
 
     unary_add = unary_operator
     unary_neg = unary_operator
@@ -170,7 +200,7 @@ class SrpTransformer(Transformer):
 
             return Literals.Constant(value=value, meta=meta)
 
-        raise RuntimeError("Unknown type.")
+        raise ValueError("Unknown type.")
 
     const_none = parse_literals
     const_number = parse_literals
