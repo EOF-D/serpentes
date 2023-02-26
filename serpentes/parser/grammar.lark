@@ -2,39 +2,61 @@ module: [statement+] // A module consists of one or more statements.
 
 statement: expression -> expr_statement // Expression statement (single)
 
-!expression: literals
+expression: literals
 	| name		-> variable
 	| "*" name	-> star_expr
-	| atom
+	| bit_expr
+	| unary_expr
+	| sum
 
-atom: list
-    | tuple
-    | set
+?atom: literals
+	| "(" sum ")"
+	| bit_expr
+	| unary_expr
 
-literals:
-	| NONE		-> const_none
-	| TRUE		-> const_true
-	| FALSE		-> const_false
-	| number	-> const_number
-	| string	-> const_string
-	| list		-> list_literal
-	| tuple		-> tuple_literal
-	| set		-> set_literal
-	| dict		-> dict_literal
+?sum: product
+	| sum add_op product
 
-NONE: "none"
-TRUE: "true"
-FALSE: "false"
+?product: atom
+	| product mul_op atom
 
-list:  "[" _cs_list{expression} "]"
-tuple: "(" _cs_list{expression} ")"
-set:   "{" _cs_list{expression} "}"
-dict:  "{" _sep{key_value, ","} "}"
+unary_expr: unary_op expression
+!unary_op: "+"	-> unary_add
+	| "-"		-> unary_neg
+	| "~"		-> unary_invert
+	| "not"		-> unary_not
+
+bit_expr.0: expression bit_op expression
+!bit_op: "<<" | ">>" | "&" | "|" | "^"
+
+!add_op: "+" | "-"
+!mul_op: "*" | "@" | "/" | "%" | "//"
+
+?literals: const_none
+	| const_true
+	| const_false
+	| list_literal
+	| tuple_literal
+	| set_literal
+	| dict_literal
+	| const_number
+	| const_string
+
+const_none: "none"
+const_true: "true"
+const_false: "false"
+
+const_string: string
+const_number: number
+
+list_literal:  "[" _cs_list{expression} "]"
+tuple_literal: "(" _cs_list{expression} ")"
+set_literal:   "{" _cs_list{expression} "}"
+dict_literal:  "{" _sep{key_value, ","} "}"
 
 _cs_list{item}: item [("," item)* | (", " item)*] ","?
 _sep{item, sep}: item (sep item)*
 key_value: expression ":" expression
-
 
 %import python.name
 %import python.number

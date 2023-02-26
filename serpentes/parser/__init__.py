@@ -27,6 +27,10 @@ Containers: typing.TypeAlias = (
     | Node[type[ast.Dict]]
 )
 
+BitOp: typing.TypeAlias = ast.LShift | ast.RShift | ast.BitOr | ast.BitXor | ast.BitAnd
+
+UnaryOp: typing.TypeAlias = ast.UAdd | ast.USub | ast.Invert | ast.Not
+
 
 def isnode(item: typing.Any) -> bool:
     return isinstance(item, Node)
@@ -39,6 +43,53 @@ class SrpTransformer(Transformer):
 
     def expr_statement(self, meta: Meta, expr: Node[typing.Any]) -> Node[type[ast.Expr]]:
         return Expressions.Expr(meta=meta, value=expr)
+
+    def bit_expr(
+        self, meta: Meta, *operation: tuple[Node[typing.Any], BitOp, Node[typing.Any]]
+    ) -> ast.BinOp:
+        return ast.BinOp(
+            meta=meta, left=operation[0], op=operation[1], right=operation[2]
+        )
+
+    def bit_op(self, _: Meta, token: Token) -> BitOp:
+        match token.value:
+            case "<<":
+                return ast.LShift()
+            case ">>":
+                return ast.RShift()
+            case "|":
+                return ast.BitOr()
+            case "^":
+                return ast.BitXor()
+            case "&":
+                return ast.BitAnd()
+
+            case _:
+                raise RuntimeError("Unknown bit operator.")
+
+    def unary_expr(
+        self, meta: Meta, op: UnaryOp, oper: Node[typing.Any]
+    ) -> Node[type[ast.UnaryOp]]:
+        return Expressions.UnaryOp(meta=meta, op=op, operand=oper)
+
+    def unary_operator(self, _: Meta, token: Token) -> UnaryOp:
+        match token.value:
+            case "+":
+                return ast.UAdd()
+            case "-":
+                return ast.USub()
+            case "~":
+                return ast.Invert()
+            case "not":
+                return ast.Not()
+
+            case _:
+                raise RuntimeError("Unknown unary operator.")
+
+    unary_add = unary_operator
+    unary_neg = unary_operator
+    unary_invert = unary_operator
+    unary_not = unary_operator
 
     def star_expr(
         self, meta: Meta, *expr: Node[typing.Any], ctx: Context = ast.Load()
