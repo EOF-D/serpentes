@@ -44,6 +44,23 @@ class SrpTransformer(Transformer):
     def expr_statement(self, meta: Meta, expr: Node[typing.Any]) -> Node[type[ast.Expr]]:
         return Expressions.Expr(meta=meta, value=expr)
 
+    def bool_oper(self, meta: Meta, *operation) -> Node[type[ast.BoolOp]]:
+        op = None
+        items = list(operation)
+
+        for item in operation:
+            if isinstance(item, (ast.Or, ast.And)):
+                op = item
+
+        if op is None:
+            raise ValueError("Unknown bool operator.")
+
+        items.pop(items.index(op))
+        return Expressions.BoolOp(meta=meta, op=op, values=items)
+
+    def bool_op(self, _: Meta, token: Token) -> ast.Or | ast.And:
+        return ast.Or() if token.value == "or" else ast.And()
+
     def product(
         self,
         meta: Meta,

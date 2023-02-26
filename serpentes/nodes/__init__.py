@@ -112,6 +112,7 @@ class Expressions:
 
     UnaryOp = define(ast.UnaryOp)
     BinOp = define(ast.BinOp)
+    BoolOp = define(ast.BoolOp)
     Compare = define(ast.Compare)
 
     Call = define(ast.Call)

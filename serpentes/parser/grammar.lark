@@ -6,12 +6,13 @@ expression: atom
 	| name		-> variable
 	| "*" name	-> star_expr
 
-?atom: literals
+?atom.0: literals
 	| "(" sum ")"
 	| sum
 	| product
 	| bit_expr
 	| unary_expr
+	| bool_oper
 
 ?sum.0: product
 	| sum add_op product
@@ -30,6 +31,12 @@ bit_expr.0: expression bit_op expression
 
 !add_op: "+" | "-"
 !mul_op: "*" | "@" | "/" | "%" | "**"
+
+bool_oper: expression bool_op expression
+bool_op: OR | AND
+
+OR.10: "or"
+AND.10: "and"
 
 ?literals: const_none
 	| const_true
