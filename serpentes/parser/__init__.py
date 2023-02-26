@@ -104,13 +104,13 @@ class SrpTransformer(Transformer):
 
     def unary_operator(self, _: Meta, token: Token) -> UnaryOp:
         match token.value:
-            case "+":
+            case "[+":
                 return ast.UAdd()
-            case "-":
+            case "[-":
                 return ast.USub()
-            case "~":
+            case "[~":
                 return ast.Invert()
-            case "not":
+            case "[not":
                 return ast.Not()
 
             case _:
