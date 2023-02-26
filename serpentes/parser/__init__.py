@@ -31,6 +31,32 @@ BitOp: typing.TypeAlias = ast.LShift | ast.RShift | ast.BitOr | ast.BitXor | ast
 UnaryOp: typing.TypeAlias = ast.UAdd | ast.USub | ast.Invert | ast.Not
 MulOp: typing.TypeAlias = ast.Mult | ast.Div | ast.Mod | ast.Pow | ast.MatMult
 
+CompOp: typing.TypeAlias = (
+    ast.Eq
+    | ast.NotEq
+    | ast.Lt
+    | ast.LtE
+    | ast.Gt
+    | ast.GtE
+    | ast.Is
+    | ast.IsNot
+    | ast.In
+    | ast.NotIn
+)
+
+COMP_OPERATORS: dict[str, CompOp] = {
+    "==": ast.Eq(),
+    "!=": ast.NotEq(),
+    "<": ast.Lt(),
+    "<=": ast.LtE(),
+    ">": ast.Gt(),
+    ">=": ast.GtE(),
+    "is": ast.Is(),
+    "is not": ast.IsNot(),
+    "in": ast.In(),
+    "not in": ast.NotIn(),
+}
+
 
 def isnode(item: typing.Any) -> bool:
     return isinstance(item, Node)
@@ -43,6 +69,29 @@ class SrpTransformer(Transformer):
 
     def expr_statement(self, meta: Meta, expr: Node[typing.Any]) -> Node[type[ast.Expr]]:
         return Expressions.Expr(meta=meta, value=expr)
+
+    def comp_oper(
+        self, meta: Meta, *items: Node[typing.Any] | CompOp
+    ) -> Node[type[ast.Compare]]:
+        listed = list(items)
+        left = listed.pop(0)
+
+        operators: list[CompOp] = []
+        comparators: list[Node[typing.Any]] = []
+
+        for potential in listed:
+            if isinstance(potential, Node):
+                comparators.append(potential)
+                continue
+
+            operators.append(potential)
+
+        return Expressions.Compare(
+            meta=meta, left=left, ops=operators, comparators=comparators
+        )
+
+    def comp_op(self, _: Meta, token: Token) -> CompOp:
+        return COMP_OPERATORS[token.value]
 
     def bool_oper(self, meta: Meta, *operation) -> Node[type[ast.BoolOp]]:
         op = None
@@ -139,9 +188,9 @@ class SrpTransformer(Transformer):
     unary_not = unary_operator
 
     def star_expr(
-        self, meta: Meta, *expr: Node[typing.Any], ctx: Context = ast.Load()
+        self, meta: Meta, expr: Node[typing.Any], ctx: Context = ast.Load()
     ) -> Node[type[ast.Starred]]:
-        return Variables.Starred(meta=meta, value=expr[1], ctx=ctx)
+        return Variables.Starred(meta=meta, value=expr, ctx=ctx)
 
     def name(
         self, meta: Meta, token: Token, ctx: Context = ast.Load()

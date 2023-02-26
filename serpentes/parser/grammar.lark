@@ -13,6 +13,7 @@ expression: atom
 	| bit_expr
 	| unary_expr
 	| bool_oper
+	| comp_oper
 
 ?sum.0: product
 	| sum add_op product
@@ -38,27 +39,41 @@ bool_op: OR | AND
 OR.10: "or"
 AND.10: "and"
 
-?literals: const_none
-	| const_true
-	| const_false
-	| list_literal
-	| tuple_literal
-	| set_literal
-	| dict_literal
-	| const_number
-	| const_string
+?comp_oper: expression (comp_op expression)*
+!comp_op: "<"
+	| ">"
+	| "=="
+	| ">="
+	| "<="
+	| "!="
+	| IN
+	| IS
+	| ISNOT
+	| NOTIN
 
-const_none: "none"
-const_true: "true"
-const_false: "false"
+IN.10: "in"
+IS.10: "is"
+ISNOT.15: "is not"
+NOTIN.15: "not in"
 
-const_string: string
-const_number: number
+literals: NONE	-> const_none
+	| TRUE		-> const_true
+	| FALSE		-> const_false
+	| number	-> const_number
+	| string	-> const_string
+	| list		-> list_literal
+	| tuple		-> tuple_literal
+	| set		-> set_literal
+	| dict		-> dict_literal
 
-list_literal:  "[" _cs_list{expression} "]"
-tuple_literal: "(" _cs_list{expression} ")"
-set_literal:   "{" _cs_list{expression} "}"
-dict_literal:  "{" _sep{key_value, ","} "}"
+NONE: "none"
+TRUE: "true"
+FALSE: "false"
+
+list:  "[" _cs_list{expression} "]"
+tuple: "(" _cs_list{expression} ")"
+set:   "{" _cs_list{expression} "}"
+dict:  "{" _sep{key_value, ","} "}"
 
 _cs_list{item}: item [("," item)* | (", " item)*] ","?
 _sep{item, sep}: item (sep item)*
