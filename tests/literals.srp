@@ -1,16 +1,16 @@
 // -*- coding: serpentes -*-
 
 // Const literals
-none
-true
-false
+print(none)
+print(true)
+print(false)
 
 // Number literals
-0xFFFF
-0b1010
-0o100
-0.99
-123
+print(0xFFFF)
+print(0b1010)
+print(0o100)
+print(0.99)
+print(123)
 
 // Strings
-"Hello World!"
+print("Hello World!")

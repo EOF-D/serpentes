@@ -70,6 +70,9 @@ class SrpTransformer(Transformer):
     def expr_statement(self, meta: Meta, expr: Node[typing.Any]) -> Node[type[ast.Expr]]:
         return Expressions.Expr(meta=meta, value=expr)
 
+    def sum_atom(self, _: Meta, atom: Node[type[ast.BinOp]]) -> Node[type[ast.BinOp]]:
+        return atom
+
     def call_expr(
         self,
         meta: Meta,
@@ -202,7 +205,7 @@ class SrpTransformer(Transformer):
                 return ast.Div()
             case "%":
                 return ast.Mod()
-            case "**":
+            case "exp":
                 return ast.Pow()
             case "@":
                 return ast.MatMult()

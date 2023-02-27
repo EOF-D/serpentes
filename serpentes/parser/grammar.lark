@@ -26,7 +26,7 @@ argument.10: expression
 	| sum_atom
 	| sum
 
-sum_atom.0: "(" sum ")"
+sum_atom.5: "(" sum ")"
 ?sum.0: product
 	| sum add_op product
 
@@ -43,7 +43,7 @@ bit_expr.0: expression bit_op expression
 !bit_op: "<<" | ">>" | "&" | "|" | "^"
 
 !add_op: "+" | "-"
-!mul_op: "*" | "@" | "/" | "%" | "**"
+!mul_op: "*" | "@" | "/" | "%" | "exp"
 
 bool_oper: expression bool_op expression
 bool_op: OR | AND
