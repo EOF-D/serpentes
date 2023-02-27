@@ -70,6 +70,36 @@ class SrpTransformer(Transformer):
     def expr_statement(self, meta: Meta, expr: Node[typing.Any]) -> Node[type[ast.Expr]]:
         return Expressions.Expr(meta=meta, value=expr)
 
+    def subscript(
+        self,
+        meta: Meta,
+        target: Node[typing.Any],
+        slice: Node[typing.Any],
+        ctx: Context = ast.Load(),
+    ):
+        return Subscripting.Subscript(meta=meta, value=target, slice=slice, ctx=ctx)
+
+    def slice(self, meta: Meta, *items: Node[typing.Any]):
+        lower, upper, step = items
+
+        if lower is not None and step is None and upper is None:
+            return lower
+
+        kwargs: dict[str, Node[typing.Any] | None] = {
+            arg: None for arg in {"lower", "step", "upper"}
+        }
+
+        if lower is not None:
+            kwargs["lower"] = lower
+
+        if step is not None:
+            kwargs["step"] = step
+
+        if upper is not None:
+            kwargs["upper"] = upper
+
+        return Subscripting.Slice(meta=meta, **kwargs)
+
     def assign_expr(
         self,
         meta: Meta,

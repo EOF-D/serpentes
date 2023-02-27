@@ -1,0 +1,12 @@
+foo <-
+	[1, 2, 3, 4, 5]
+
+print(foo[0])
+print(foo[0:1])
+print(foo[0:1:2])
+print(foo[:])
+
+expression <-
+	0 + 1
+
+print(foo[expression])

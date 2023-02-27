@@ -6,12 +6,16 @@ expression: atom_expr
 
 ?atom_expr: atom_expr "(" [arguments] ")"	-> call_expr
 	| atom_expr "." name					-> attr
+	| subscript
 	| if_expr
 	| assign_expr
 	| atom
 
 ?if_expr: expression "if" expression "else" expression
 assign_expr: name "<-" expression
+
+?subscript.10: atom_expr "[" slice "]"
+?slice: [[atom_expr] [":" [atom_expr] [":" [atom_expr]]]]
 
 ?arguments.15: _sep{argument, ","}
 call_kwargs.15: "**" expression
@@ -87,10 +91,10 @@ NONE: "none"
 TRUE: "true"
 FALSE: "false"
 
-list:  "[" _cs_list{expression} "]"
-tuple: "(" _cs_list{expression} ")"
-set:   "{" _cs_list{expression} "}"
-dict:  "{" _sep{key_value, ","} "}"
+list.0:  "[" _cs_list{expression} "]"
+tuple.0: "(" _cs_list{expression} ")"
+set.0:   "{" _cs_list{expression} "}"
+dict.0:  "{" _sep{key_value, ","} "}"
 
 _cs_list{item}: item [("," item)* | (", " item)*] ","?
 _sep{item, sep}: item (sep item)*

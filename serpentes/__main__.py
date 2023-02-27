@@ -4,7 +4,6 @@ from argparse import ArgumentParser
 from sysconfig import get_paths
 
 import rich
-from astpretty import pformat
 from lark import Lark
 
 from serpentes import SrpTransformer, __author__, __version__
@@ -63,7 +62,8 @@ def main() -> None:
                 rich.inspect(tree, methods=True)
 
                 module = tree.build()
-                rich.print(pformat(module))
+                for index, children in enumerate(module.body):
+                    rich.print(index, ast.dump(children, indent=2))
 
                 code = compile(module, "<string>", "exec")
                 exec(code)
