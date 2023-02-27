@@ -58,8 +58,12 @@ def main() -> None:
             tree = SrpTransformer().transform(parser.parse(fp.read()))
             rich.inspect(tree, methods=True)
 
-            for index, children in enumerate(tree.build().body):
+            module = tree.build()
+            for index, children in enumerate(module.body):
                 rich.print(index, ast.dump(children, indent=2))
+
+            code = compile(module, "<string>", "exec")
+            exec(code)
 
 
 if __name__ == "__main__":

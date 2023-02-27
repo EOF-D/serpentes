@@ -70,6 +70,76 @@ class SrpTransformer(Transformer):
     def expr_statement(self, meta: Meta, expr: Node[typing.Any]) -> Node[type[ast.Expr]]:
         return Expressions.Expr(meta=meta, value=expr)
 
+    def call_expr(
+        self,
+        meta: Meta,
+        func: Node[type[ast.Name | ast.Attribute]],
+        arguments: Node[typing.Any] | list[Node[typing.Any]],
+    ) -> Node[type[ast.Call]]:
+        keywords: list[Node[ast.keyword]] = []
+        passed: list[Node[typing.Any]] = []
+
+        if isinstance(arguments, list):
+            for argument in arguments:
+                if argument.ast is ast.keyword:
+                    keywords.append(argument)
+
+                else:
+                    passed.append(argument)
+
+        if not isinstance(arguments, list):
+            if arguments is None:
+                pass
+
+            elif arguments.ast is not ast.keyword:
+                passed = [arguments]
+
+            elif arguments.ast is ast.keyword:
+                keywords = [arguments]
+
+        return Expressions.Call(meta=meta, func=func, args=passed, keywords=keywords)
+
+    def call_kwargs(self, meta: Meta, items: Node[typing.Any]) -> Node[type[ast.keyword]]:
+        return Expressions.Keyword(meta=meta, arg=None, value=items)
+
+    def arguments(self, _: Meta, *items: Node[typing.Any]) -> list[Node[typing.Any]]:
+        return list(items)
+
+    def argument(self, _: Meta, item: Node[typing.Any]) -> Node[typing.Any]:
+        return item
+
+    def keyword(self, meta: Meta, *argument: Node[typing.Any]) -> Node[typing.Any]:
+        return Expressions.Keyword(
+            meta=meta, arg=argument[0].data["id"], value=argument[1]
+        )
+
+    def attr(
+        self, meta: Meta, first: Node[type[ast.Name]], *items, ctx: Context = ast.Load()
+    ):
+        listed = list(items)
+
+        def parse(
+            attr: Node[type[ast.Name] | type[ast.Attribute]],
+        ) -> str | Node[type[ast.Attribute]]:
+            if id := attr.data.get("id"):
+                return id
+
+            elif attribute := attr.data.get("attr"):
+                return attribute
+
+            raise ValueError("Unknown type.")
+
+        attribute = Expressions.Attribute(
+            meta=meta, value=first, attr=parse(listed.pop(0)), ctx=ctx
+        )
+
+        for other in listed:
+            attribute = Expressions.Attribute(
+                meta=meta, value=attribute, attr=parse(other), ctx=ctx
+            )
+
+        return attribute
+
     def comp_oper(
         self, meta: Meta, *items: Node[typing.Any] | CompOp
     ) -> Node[type[ast.Compare]]:
@@ -273,8 +343,10 @@ class SrpTransformer(Transformer):
     const_false = parse_literals
     const_true = parse_literals
 
-    def const_string(self, _: Meta, string: Node[type[ast.Constant]]):
+    def const_string(
+        self, _: Meta, string: Node[type[ast.Constant]]
+    ) -> Node[type[ast.Constant]]:
         return string
 
     def string(self, meta: Meta, token: Token) -> Node[type[ast.Constant]]:
-        return Literals.Constant(value=token.value, meta=meta)
+        return Literals.Constant(value=token.value.replace('"', ""), meta=meta)

@@ -2,19 +2,31 @@ module: [statement+] // A module consists of one or more statements.
 
 statement: expression -> expr_statement // Expression statement (single)
 
-expression: atom
-	| name		-> variable
-	| "*" name	-> star_expr
+expression: atom_expr
 
-?atom.0: literals
-	| "(" sum ")"
-	| sum
+?atom_expr: atom_expr "(" [arguments] ")"	-> call_expr
+	| atom_expr "." name					-> attr
+	| atom
+
+?arguments.15: _sep{argument, ","}
+call_kwargs.15: "**" expression
+
+argument.10: expression
+	| name "=" expression	-> keyword
+	| call_kwargs
+
+?atom: literals
+	| name				-> variable
+	| "*" expression	-> star_expr
 	| product
 	| bit_expr
 	| unary_expr
 	| bool_oper
 	| comp_oper
+	| sum_atom
+	| sum
 
+sum_atom.0: "(" sum ")"
 ?sum.0: product
 	| sum add_op product
 

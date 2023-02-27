@@ -1,0 +1,5 @@
+print("Hello World!")
+print("foo", "bar", sep=" ")
+print(*[1, 2, 3])
+print("foo", "bar", **{"sep": ""})
+print()
