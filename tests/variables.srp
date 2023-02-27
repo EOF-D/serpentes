@@ -1,8 +1,13 @@
-foo
-bar
-baz
+// foo
+// bar
+// baz
 
-*foo
+// *foo
+
+item <-
+	"foo"
+
+print(item)
 
 // foo = 123
 // bar = "bar"

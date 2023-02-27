@@ -70,6 +70,18 @@ class SrpTransformer(Transformer):
     def expr_statement(self, meta: Meta, expr: Node[typing.Any]) -> Node[type[ast.Expr]]:
         return Expressions.Expr(meta=meta, value=expr)
 
+    def assign_expr(
+        self,
+        meta: Meta,
+        target: Node[type[ast.Name | ast.Attribute]],
+        value: Node[typing.Any],
+    ) -> Node[type[ast.NamedExpr]]:
+        if ctx := target.data.get("ctx"):
+            if not isinstance(ctx, ast.Store):
+                target.data["ctx"] = ast.Store()
+
+        return Expressions.NamedExpr(meta=meta, target=target, value=value)
+
     def if_expr(self, meta: Meta, *items: Node[typing.Any]) -> Node[type[ast.IfExp]]:
         return Expressions.IfExp(meta=meta, test=items[1], body=items[0], orelse=items[2])
 
