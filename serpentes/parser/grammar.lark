@@ -6,7 +6,10 @@ expression: atom_expr
 
 ?atom_expr: atom_expr "(" [arguments] ")"	-> call_expr
 	| atom_expr "." name					-> attr
+	| if_expr
 	| atom
+
+?if_expr: expression "if" expression "else" expression
 
 ?arguments.15: _sep{argument, ","}
 call_kwargs.15: "**" expression
