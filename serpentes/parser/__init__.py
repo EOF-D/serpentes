@@ -115,7 +115,7 @@ class SrpTransformer(Transformer):
 
     def attr(
         self, meta: Meta, first: Node[type[ast.Name]], *items, ctx: Context = ast.Load()
-    ):
+    ) -> Node[type[ast.Attribute]]:
         listed = list(items)
 
         def parse(
