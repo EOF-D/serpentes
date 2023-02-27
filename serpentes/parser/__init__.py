@@ -85,20 +85,7 @@ class SrpTransformer(Transformer):
         if lower is not None and step is None and upper is None:
             return lower
 
-        kwargs: dict[str, Node[typing.Any] | None] = {
-            arg: None for arg in {"lower", "step", "upper"}
-        }
-
-        if lower is not None:
-            kwargs["lower"] = lower
-
-        if step is not None:
-            kwargs["step"] = step
-
-        if upper is not None:
-            kwargs["upper"] = upper
-
-        return Subscripting.Slice(meta=meta, **kwargs)
+        return Subscripting.Slice(meta=meta, lower=lower, upper=upper, step=step)
 
     def assign_expr(
         self,
