@@ -1,1 +1,4 @@
-foo[0:1:2]
+items = [1, 2, 3, 4, 5]
+values = ["a", "b", "c", "d", "e"]
+
+foo = [values.index(index) for (index, _) in enumerate(items)]

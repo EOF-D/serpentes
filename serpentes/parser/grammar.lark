@@ -6,6 +6,7 @@ expression: atom_expr
 
 ?atom_expr: atom_expr "(" [arguments] ")"	-> call_expr
 	| atom_expr "." name					-> attr
+	| "[" comp_expr{atom_expr} "]"			-> list_comp
 	| subscript
 	| if_expr
 	| assign_expr
@@ -19,6 +20,11 @@ assign_expr: name "<-" expression
 
 ?arguments.15: _sep{argument, ","}
 call_kwargs.15: "**" expression
+
+comp_expr{result}: result comp_for
+
+comp_for: "for" atom_expr "in" atom_expr [comp_if]
+comp_if: "if" atom_expr
 
 argument.10: expression
 	| name "=" expression	-> keyword

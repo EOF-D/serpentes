@@ -70,13 +70,57 @@ class SrpTransformer(Transformer):
     def expr_statement(self, meta: Meta, expr: Node[typing.Any]) -> Node[type[ast.Expr]]:
         return Expressions.Expr(meta=meta, value=expr)
 
+    def list_comp(self, meta: Meta, comp) -> Node[type[ast.ListComp]]:
+        return Comprehensions.ListComp(meta=meta, elt=comp[0], generators=comp[1])
+
+    def comp_expr(
+        self,
+        _: Meta,
+        elts: Node[typing.Any],
+        generators: list[Node[type[ast.comprehension]]],
+    ) -> tuple[Node[typing.Any], list[Node[type[ast.comprehension]]]]:
+        return elts, generators
+
+    def comp_if(self, _: Meta, test: Node[typing.Any]) -> Node[typing.Any]:
+        return test
+
+    def comp_for(
+        self,
+        meta: Meta,
+        target: Node[typing.Any],
+        iterator: Node[typing.Any],
+        ifs: Node[typing.Any],
+    ) -> list[Node[type[ast.comprehension]]]:
+        if ctx := target.data.get("ctx"):
+            if not isinstance(ctx, ast.Store):
+                target.data["ctx"] = ast.Store()
+
+        if "elts" in target.ast._fields:
+            for item in target.data["elts"]:
+                if item.ast is ast.Name:
+                    item.data["ctx"] = ast.Store()
+
+                elif item.ast is ast.Attribute:
+                    item.data["value"].data["ctx"] = ast.Store()
+                    item.data["ctx"] = ast.Store()
+
+        return [
+            Comprehensions.Comphrehension(
+                meta=meta,
+                target=target,
+                iter=iterator,
+                ifs=[ifs] if ifs is not None else [],
+                is_async=0,
+            )
+        ]
+
     def subscript(
         self,
         meta: Meta,
         target: Node[typing.Any],
         slice: Node[typing.Any],
         ctx: Context = ast.Load(),
-    ):
+    ) -> Node[type[ast.Subscript]]:
         return Subscripting.Subscript(meta=meta, value=target, slice=slice, ctx=ctx)
 
     def slice(self, meta: Meta, *items: Node[typing.Any]):
