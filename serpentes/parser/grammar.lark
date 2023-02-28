@@ -7,6 +7,9 @@ expression: atom_expr
 ?atom_expr: atom_expr "(" [arguments] ")"	-> call_expr
 	| atom_expr "." name					-> attr
 	| "[" comp_expr{atom_expr} "]"			-> list_comp
+	| "(" comp_expr{atom_expr} ")"			-> gen_expr
+	| "{" comp_expr{atom_expr} "}"			-> set_expr
+	| "{" comp_expr{key_value} "}"			-> dict_expr
 	| subscript
 	| if_expr
 	| assign_expr

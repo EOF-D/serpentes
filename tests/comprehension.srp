@@ -3,4 +3,16 @@ items <- [1, 2, 3, 4, 5]
 foo <-
 	[item + 1 for item in items]
 
+bar <-
+	(item + 1 for item in items)
+
+baz <-
+	{item + 1 for item in items}
+
+qux <-
+	{item: item + 1 for item in items}
+
 print(foo)
+print(*bar)
+print(baz)
+print(qux)

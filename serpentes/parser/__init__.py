@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import ast
 import typing
-from itertools import islice
 
 from lark import Token, Transformer, Tree, v_args
 from lark.tree import Meta
@@ -44,6 +43,11 @@ CompOp: typing.TypeAlias = (
     | ast.NotIn
 )
 
+CompExpr: typing.TypeAlias = tuple[Node[typing.Any], list[Node[type[ast.comprehension]]]]
+DictComp: typing.TypeAlias = tuple[
+    tuple[Node[typing.Any], ...], list[Node[type[ast.comprehension]]]
+]
+
 COMP_OPERATORS: dict[str, CompOp] = {
     "==": ast.Eq(),
     "!=": ast.NotEq(),
@@ -70,15 +74,26 @@ class SrpTransformer(Transformer):
     def expr_statement(self, meta: Meta, expr: Node[typing.Any]) -> Node[type[ast.Expr]]:
         return Expressions.Expr(meta=meta, value=expr)
 
-    def list_comp(self, meta: Meta, comp) -> Node[type[ast.ListComp]]:
+    def list_comp(self, meta: Meta, comp: CompExpr) -> Node[type[ast.ListComp]]:
         return Comprehensions.ListComp(meta=meta, elt=comp[0], generators=comp[1])
+
+    def gen_expr(self, meta: Meta, comp: CompExpr) -> Node[type[ast.GeneratorExp]]:
+        return Comprehensions.GeneratorExp(meta=meta, elt=comp[0], generators=comp[1])
+
+    def set_expr(self, meta: Meta, comp: CompExpr) -> Node[type[ast.SetComp]]:
+        return Comprehensions.SetComp(meta=meta, elt=comp[0], generators=comp[1])
+
+    def dict_expr(self, meta: Meta, comp: DictComp):
+        return Comprehensions.DictComp(
+            meta=meta, key=comp[0][0], value=comp[0][1], generators=comp[1]
+        )
 
     def comp_expr(
         self,
         _: Meta,
         elts: Node[typing.Any],
         generators: list[Node[type[ast.comprehension]]],
-    ) -> tuple[Node[typing.Any], list[Node[type[ast.comprehension]]]]:
+    ) -> CompExpr:
         return elts, generators
 
     def comp_if(self, _: Meta, test: Node[typing.Any]) -> Node[typing.Any]:
